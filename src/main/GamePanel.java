@@ -7,13 +7,15 @@ import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
+import entity.Player;
+
 public class GamePanel extends JPanel implements Runnable{
     //Settings for screen
 
     final int originalTileSize = 16;
     final int scale = 3;
 
-    final int tileSize = originalTileSize * scale;
+    public final int tileSize = originalTileSize * scale;
     final int maxScreenCol = 18; //16 titles horizontally
     final int maxScreenRow = 14; //12 titles vertically
     final int screenWidth = tileSize * maxScreenCol;
@@ -27,6 +29,9 @@ public class GamePanel extends JPanel implements Runnable{
 
     //Tracks game time.
     Thread gameThread;
+
+
+    Player player = new Player(this, keyH);
 
     //Players default pos
     int playerX = 100;
@@ -56,6 +61,7 @@ public class GamePanel extends JPanel implements Runnable{
         
         double drawInterval = 1000000000/FPS; //1 billion nanoseconds divided by the FPS.
         double nextDrawTime = System.nanoTime() + drawInterval;
+
         while(gameThread != null)
         {
             //Update Character Position
@@ -63,7 +69,6 @@ public class GamePanel extends JPanel implements Runnable{
 
             //Draw Screen with updated info
             repaint();
-
 
             try {
                 //Subtract current time from the nextDraw time
@@ -91,22 +96,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     public void update()
     {
-        //moves the player by the player speed. (4 pixels as of nbow)
-        if(keyH.upmove == true){
-            playerY -= playerSpeed;
-        }
-        else if(keyH.downmove == true)
-        {
-            playerY += playerSpeed;
-        }
-        else if(keyH.leftmove == true)
-        {
-            playerX -= playerSpeed;
-        }
-        else if(keyH.rightmove == true)
-        {
-            playerX += playerSpeed;
-        }
+        player.update();
     }
 
     public void paintComponent(Graphics g){
@@ -114,9 +104,7 @@ public class GamePanel extends JPanel implements Runnable{
 
         Graphics2D graphicsD = (Graphics2D)g;
 
-        graphicsD.setColor(Color.WHITE);
-
-        graphicsD.fillRect(playerX, playerY, tileSize, tileSize); //Redraws the recatangle with the updated cords.
+        player.draw(graphicsD);
 
         graphicsD.dispose();
     }
