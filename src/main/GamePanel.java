@@ -19,14 +19,30 @@ public class GamePanel extends JPanel implements Runnable{
     final int screenWidth = tileSize * maxScreenCol;
     final int screenHeight = tileSize * maxScreenRow;
 
+    //FPS
+    int FPS = 60;
+
+
+    Keyboard keyH = new Keyboard();
+
     //Tracks game time.
     Thread gameThread;
+
+    //Players default pos
+    int playerX = 100;
+    int playerY = 100;
+    int playerSpeed = 4;
+
+
 
     public GamePanel()
     {
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
         this.setBackground(Color.BLACK);
         this.setDoubleBuffered(true);
+
+        this.addKeyListener(keyH);
+        this.setFocusable(true);
     }
 
 
@@ -38,7 +54,8 @@ public class GamePanel extends JPanel implements Runnable{
     @Override
     public void run() {
         
-
+        double drawInterval = 1000000000/FPS; //1 billion nanoseconds divided by the FPS.
+        double nextDrawTime = System.nanoTime() + drawInterval;
         while(gameThread != null)
         {
             //Update Character Position
@@ -48,16 +65,48 @@ public class GamePanel extends JPanel implements Runnable{
             repaint();
 
 
+            try {
+                //Subtract current time from the nextDraw time
+                double remainingTime = nextDrawTime - System.nanoTime();
+                remainingTime = remainingTime/1000000;
+
+                if(remainingTime < 0)
+                {
+                    remainingTime = 0;
+                }
+
+                Thread.sleep((long) remainingTime); //Pauses the game loop.
+                nextDrawTime += drawInterval;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+            
+
+
         }
 
-
-
-        throw new UnsupportedOperationException("Unimplemented method 'run'");
     }
 
     public void update()
     {
-
+        //moves the player by the player speed. (4 pixels as of nbow)
+        if(keyH.upmove == true){
+            playerY -= playerSpeed;
+        }
+        else if(keyH.downmove == true)
+        {
+            playerY += playerSpeed;
+        }
+        else if(keyH.leftmove == true)
+        {
+            playerX -= playerSpeed;
+        }
+        else if(keyH.rightmove == true)
+        {
+            playerX += playerSpeed;
+        }
     }
 
     public void paintComponent(Graphics g){
@@ -67,7 +116,7 @@ public class GamePanel extends JPanel implements Runnable{
 
         graphicsD.setColor(Color.WHITE);
 
-        graphicsD.fillRect(100, 100, tileSize, tileSize);
+        graphicsD.fillRect(playerX, playerY, tileSize, tileSize); //Redraws the recatangle with the updated cords.
 
         graphicsD.dispose();
     }
